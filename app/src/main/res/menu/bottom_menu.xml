@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:title="Notifications"
+        android:icon="@drawable/ic_turn_notifications_on_button"
+        app:showAsAction="always"
+        android:id="@+id/notification"/>
+
+    <item
+        android:title="My Beneficiary"
+        app:showAsAction="always"
+        android:id="@+id/beneficiary"
+        android:icon="@drawable/ic_beneficiary"/>
+
+    <item
+        android:title="Settings"
+        android:id="@+id/settings"
+        android:icon="@drawable/ic_settings_work_tool"
+        app:showAsAction="always"/>
+
+
+
+</menu>
