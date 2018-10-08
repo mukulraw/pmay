@@ -48,6 +48,14 @@ public class MainActivity extends AppCompatActivity {
 
                         toolbar.setText("My Beneficiary");
 
+                        FragmentManager fm2 = getSupportFragmentManager();
+                        FragmentTransaction ft2 = fm2.beginTransaction();
+                        Beneficiary frag2 = new Beneficiary();
+                        ft2.replace(R.id.replace, frag2);
+                        ft2.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
+                        ft2.commit();
+
+
                         break;
 
 

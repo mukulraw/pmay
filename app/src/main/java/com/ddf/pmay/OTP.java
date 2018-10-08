@@ -5,11 +5,11 @@ import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.goodiebag.pinview.Pinview;
 
@@ -47,8 +47,12 @@ public class OTP extends AppCompatActivity {
 
         });
 
-        verify.setClickable(false);
-        verify.setEnabled(false);
+        verify.setClickable(true);
+        verify.setEnabled(true);
+
+
+        otpView.setValue(SharePreferenceUtils.getInstance().getString("otp"));
+
 
         otpView.setPinViewEventListener(new Pinview.PinViewEventListener() {
 
@@ -74,11 +78,19 @@ public class OTP extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                Log.d("asdasd" , "clicked");
+                if (otpView.getValue().length() == 4)
+                {
+                    Intent intent = new Intent(OTP.this , MainActivity.class);
+                    startActivity(intent);
+                    finishAffinity();
+                }
+                else
+                {
+                    Toast.makeText(OTP.this, "Invalid OTP", Toast.LENGTH_SHORT).show();
+                }
 
-                Intent intent = new Intent(OTP.this , MainActivity.class);
-                startActivity(intent);
-                finishAffinity();
+
+
 
             }
         });

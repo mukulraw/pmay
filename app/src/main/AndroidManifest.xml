@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.ddf.pmay">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".bean"
         android:allowBackup="true"
@@ -24,7 +26,8 @@
             android:screenOrientation="portrait" />
         <activity android:name=".LoginSignip" />
         <activity android:name=".OTP" />
-        <activity android:name=".MainActivity"></activity>
+        <activity android:name=".MainActivity" />
+        <activity android:name=".UpdateJob"></activity>
     </application>
 
 </manifest>
