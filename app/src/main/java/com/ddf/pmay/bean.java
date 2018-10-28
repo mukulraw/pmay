@@ -7,7 +7,7 @@ public class bean extends Application {
 
     private static Context context;
 
-    public String BASE_URL = "http://ec2-13-127-59-58.ap-south-1.compute.amazonaws.com/pmay/";
+    public String BASE_URL = "http://ec2-13-126-246-74.ap-south-1.compute.amazonaws.com/";
 
     public static Context getContext() {
         return context;

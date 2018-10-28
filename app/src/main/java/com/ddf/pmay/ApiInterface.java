@@ -13,19 +13,21 @@ import retrofit2.http.Part;
 public interface ApiInterface {
 
     @Multipart
-    @POST("api/mobile_signin.php")
+    @POST("pmay/api/mobile_signin.php")
     Call<loginBean> login
-            (@Part("phone") String phone
+            (
+                    @Part("phone") String phone,
+                    @Part("password") String password
             );
 
-    @GET("api/peding_get.php")
+    @GET("pmay/api/peding_get.php")
     Call<List<jobListBean>> pendingList();
 
-    @GET("api/visited_get.php")
+    @GET("pmay/api/visited_get.php")
     Call<List<jobListBean>> visitedList();
 
     @Multipart
-    @POST("api/updateJob.php")
+    @POST("pmay/api/updateJob.php")
     Call<String> updateJob
             (
                     @Part("id") String id,

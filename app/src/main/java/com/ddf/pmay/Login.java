@@ -10,7 +10,7 @@ import javax.security.auth.login.LoginException;
 
 public class Login extends AppCompatActivity {
 
-    Button login;
+    Button login , signup;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,6 +19,7 @@ public class Login extends AppCompatActivity {
 
 
         login = findViewById(R.id.button);
+        signup = findViewById(R.id.button2);
 
         login.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -27,6 +28,16 @@ public class Login extends AppCompatActivity {
                 Intent intent = new Intent(Login.this , LoginSignip.class);
                 startActivity(intent);
                 finish();
+
+            }
+        });
+
+
+        signup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
 
             }
         });

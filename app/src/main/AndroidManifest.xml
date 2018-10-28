@@ -9,7 +9,7 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/ddfconsultantsapr16"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
@@ -27,7 +27,8 @@
         <activity android:name=".LoginSignip" />
         <activity android:name=".OTP" />
         <activity android:name=".MainActivity" />
-        <activity android:name=".UpdateJob"></activity>
+        <activity android:name=".UpdateJob" />
+        <activity android:name=".Signup"></activity>
     </application>
 
 </manifest>

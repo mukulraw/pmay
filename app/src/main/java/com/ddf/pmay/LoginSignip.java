@@ -22,7 +22,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 public class LoginSignip extends AppCompatActivity {
 
 
-    EditText phone;
+    EditText phone, password;
     Button login;
     ProgressBar progress;
 
@@ -33,6 +33,7 @@ public class LoginSignip extends AppCompatActivity {
         setContentView(R.layout.activity_login_signip);
 
         phone = findViewById(R.id.editText);
+        password = findViewById(R.id.editText2);
         login = findViewById(R.id.button3);
         progress = findViewById(R.id.progressBar);
 
@@ -41,55 +42,66 @@ public class LoginSignip extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                String p = phone.getText().toString();
+                String pho = phone.getText().toString();
+                String pass = password.getText().toString();
 
-                if (p.length() == 10) {
+                if (pho.length() == 10) {
 
+                    if (pass.length() > 0) {
+                        progress.setVisibility(View.VISIBLE);
 
-                    progress.setVisibility(View.VISIBLE);
+                        bean b = (bean) getApplicationContext();
 
-                    bean b = (bean) getApplicationContext();
+                        Retrofit retrofit = new Retrofit.Builder()
+                                .baseUrl(b.BASE_URL)
+                                .addConverterFactory(ScalarsConverterFactory.create())
+                                .addConverterFactory(GsonConverterFactory.create()).build();
 
-                    Retrofit retrofit = new Retrofit.Builder()
-                            .baseUrl(b.BASE_URL)
-                            .addConverterFactory(ScalarsConverterFactory.create())
-                            .addConverterFactory(GsonConverterFactory.create()).build();
-
-                    ApiInterface cr = retrofit.create(ApiInterface.class);
-
-
-                    Call<loginBean> call = cr.login(p);
-
-                    call.enqueue(new Callback<loginBean>() {
-                        @Override
-                        public void onResponse(@NonNull Call<loginBean> call, @NonNull Response<loginBean> response) {
-
-                            if (response.body() != null && response.body().getStatus().equals("1")) {
+                        ApiInterface cr = retrofit.create(ApiInterface.class);
 
 
-                                SharePreferenceUtils.getInstance().putString("id", response.body().getData().getUserId());
-                                SharePreferenceUtils.getInstance().putString("name", response.body().getData().getUsername());
-                                SharePreferenceUtils.getInstance().putString("email", response.body().getData().getEmail());
-                                SharePreferenceUtils.getInstance().putString("phone", response.body().getData().getPhone());
-                                SharePreferenceUtils.getInstance().putString("otp", response.body().getData().getOtp());
+                        Call<loginBean> call = cr.login(pho, pass);
 
-                                Toast.makeText(LoginSignip.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
+                        call.enqueue(new Callback<loginBean>() {
+                            @Override
+                            public void onResponse(@NonNull Call<loginBean> call, @NonNull Response<loginBean> response) {
 
-                                Intent intent = new Intent(LoginSignip.this, OTP.class);
-                                startActivity(intent);
+                                if (response.body() != null && response.body().getStatus().equals("1")) {
 
+
+                                    SharePreferenceUtils.getInstance().putString("id", response.body().getData().getUserId());
+                                    SharePreferenceUtils.getInstance().putString("name", response.body().getData().getUsername());
+                                    SharePreferenceUtils.getInstance().putString("email", response.body().getData().getEmail());
+                                    SharePreferenceUtils.getInstance().putString("phone", response.body().getData().getPhone());
+                                    SharePreferenceUtils.getInstance().putString("otp", response.body().getData().getOtp());
+
+                                    Toast.makeText(LoginSignip.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
+
+                                    Intent intent = new Intent(LoginSignip.this, OTP.class);
+                                    startActivity(intent);
+
+
+                                } else {
+
+                                    if (response.body() != null) {
+                                        Toast.makeText(LoginSignip.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
+
+                                }
+
+                                progress.setVisibility(View.GONE);
 
                             }
 
-                            progress.setVisibility(View.GONE);
-
-                        }
-
-                        @Override
-                        public void onFailure(@NonNull Call<loginBean> call, @NonNull Throwable t) {
-                            progress.setVisibility(View.GONE);
-                        }
-                    });
+                            @Override
+                            public void onFailure(@NonNull Call<loginBean> call, @NonNull Throwable t) {
+                                progress.setVisibility(View.GONE);
+                                Toast.makeText(LoginSignip.this, t.toString(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    } else {
+                        Toast.makeText(LoginSignip.this, "Invalid password", Toast.LENGTH_SHORT).show();
+                    }
 
 
                 } else {
