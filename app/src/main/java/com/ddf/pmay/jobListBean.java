@@ -55,21 +55,24 @@ public class jobListBean {
     @SerializedName("16")
     @Expose
     private String _16;
-    @SerializedName("id")
+    @SerializedName("17")
     @Expose
-    private String id;
+    private String _17;
+    @SerializedName("job_Id")
+    @Expose
+    private String jobId;
     @SerializedName("name")
     @Expose
     private String name;
-    @SerializedName("beneficiaryID")
+    @SerializedName("beneficiary_ID")
     @Expose
     private String beneficiaryID;
-    @SerializedName("fatherName")
+    @SerializedName("father_Name")
     @Expose
     private String fatherName;
-    @SerializedName("ward")
+    @SerializedName("address")
     @Expose
-    private String ward;
+    private String address;
     @SerializedName("state")
     @Expose
     private String state;
@@ -79,7 +82,7 @@ public class jobListBean {
     @SerializedName("city")
     @Expose
     private String city;
-    @SerializedName("projectName")
+    @SerializedName("project_Name")
     @Expose
     private String projectName;
     @SerializedName("stage")
@@ -88,15 +91,18 @@ public class jobListBean {
     @SerializedName("payment")
     @Expose
     private String payment;
-    @SerializedName("startDate")
+    @SerializedName("start_Date")
     @Expose
     private String startDate;
-    @SerializedName("completeDate")
+    @SerializedName("completion_Date")
     @Expose
-    private String completeDate;
+    private String completionDate;
     @SerializedName("location")
     @Expose
     private String location;
+    @SerializedName("stage_status")
+    @Expose
+    private String stageStatus;
     @SerializedName("status")
     @Expose
     private String status;
@@ -243,12 +249,20 @@ public class jobListBean {
         this._16 = _16;
     }
 
-    public String getId() {
-        return id;
+    public String get17() {
+        return _17;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void set17(String _17) {
+        this._17 = _17;
+    }
+
+    public String getJobId() {
+        return jobId;
+    }
+
+    public void setJobId(String jobId) {
+        this.jobId = jobId;
     }
 
     public String getName() {
@@ -275,12 +289,12 @@ public class jobListBean {
         this.fatherName = fatherName;
     }
 
-    public String getWard() {
-        return ward;
+    public String getAddress() {
+        return address;
     }
 
-    public void setWard(String ward) {
-        this.ward = ward;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public String getState() {
@@ -339,12 +353,12 @@ public class jobListBean {
         this.startDate = startDate;
     }
 
-    public String getCompleteDate() {
-        return completeDate;
+    public String getCompletionDate() {
+        return completionDate;
     }
 
-    public void setCompleteDate(String completeDate) {
-        this.completeDate = completeDate;
+    public void setCompletionDate(String completionDate) {
+        this.completionDate = completionDate;
     }
 
     public String getLocation() {
@@ -353,6 +367,14 @@ public class jobListBean {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public String getStageStatus() {
+        return stageStatus;
+    }
+
+    public void setStageStatus(String stageStatus) {
+        this.stageStatus = stageStatus;
     }
 
     public String getStatus() {

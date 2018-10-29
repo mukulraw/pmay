@@ -71,7 +71,7 @@ public class Visited extends Fragment {
         ApiInterface cr = retrofit.create(ApiInterface.class);
 
 
-        Call<List<jobListBean>> call = cr.visitedList();
+        Call<List<jobListBean>> call = cr.visitedList(SharePreferenceUtils.getInstance().getString("id"));
         call.enqueue(new Callback<List<jobListBean>>() {
             @Override
             public void onResponse(@NonNull Call<List<jobListBean>> call, @NonNull Response<List<jobListBean>> response) {

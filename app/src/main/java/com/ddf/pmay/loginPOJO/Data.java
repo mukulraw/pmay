@@ -22,6 +22,9 @@ public class Data {
     @SerializedName("status")
     @Expose
     private String status;
+    @SerializedName("area_id")
+    @Expose
+    private String areaId;
     @SerializedName("create_date")
     @Expose
     private String createDate;
@@ -72,6 +75,14 @@ public class Data {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getAreaId() {
+        return areaId;
+    }
+
+    public void setAreaId(String areaId) {
+        this.areaId = areaId;
     }
 
     public String getCreateDate() {

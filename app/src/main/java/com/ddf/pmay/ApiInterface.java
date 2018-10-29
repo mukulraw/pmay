@@ -20,11 +20,30 @@ public interface ApiInterface {
                     @Part("password") String password
             );
 
-    @GET("pmay/api/peding_get.php")
-    Call<List<jobListBean>> pendingList();
+    @Multipart
+    @POST("pmay/api/signup.php")
+    Call<String> signup
+            (
+                    @Part("name") String name,
+                    @Part("phone") String phone,
+                    @Part("password") String password,
+                    @Part("area_id") String areaId
+            );
 
-    @GET("pmay/api/visited_get.php")
-    Call<List<jobListBean>> visitedList();
+    @Multipart
+    @POST("pmay/api/peding_get.php")
+    Call<List<jobListBean>> pendingList(
+            @Part("uid") String userId
+    );
+
+    @GET("pmay/api/areasGet.php")
+    Call<List<areasBean>> areas();
+
+    @Multipart
+    @POST("pmay/api/visited_get.php")
+    Call<List<jobListBean>> visitedList(
+            @Part("uid") String userId
+    );
 
     @Multipart
     @POST("pmay/api/updateJob.php")

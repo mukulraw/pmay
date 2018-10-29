@@ -74,10 +74,11 @@ public class LoginSignip extends AppCompatActivity {
                                     SharePreferenceUtils.getInstance().putString("email", response.body().getData().getEmail());
                                     SharePreferenceUtils.getInstance().putString("phone", response.body().getData().getPhone());
                                     SharePreferenceUtils.getInstance().putString("otp", response.body().getData().getOtp());
+                                    SharePreferenceUtils.getInstance().putString("aid", response.body().getData().getAreaId());
 
                                     Toast.makeText(LoginSignip.this, response.body().getMessage(), Toast.LENGTH_SHORT).show();
 
-                                    Intent intent = new Intent(LoginSignip.this, OTP.class);
+                                    Intent intent = new Intent(LoginSignip.this, MainActivity.class);
                                     startActivity(intent);
 
 

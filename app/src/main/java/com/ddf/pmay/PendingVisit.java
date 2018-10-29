@@ -71,7 +71,7 @@ public class PendingVisit extends Fragment {
         ApiInterface cr = retrofit.create(ApiInterface.class);
 
 
-        Call<List<jobListBean>> call = cr.pendingList();
+        Call<List<jobListBean>> call = cr.pendingList(SharePreferenceUtils.getInstance().getString("id"));
         call.enqueue(new Callback<List<jobListBean>>() {
             @Override
             public void onResponse(@NonNull Call<List<jobListBean>> call, @NonNull Response<List<jobListBean>> response) {
@@ -132,14 +132,14 @@ public class PendingVisit extends Fragment {
 
                     Intent intent = new Intent(context , UpdateJob.class);
                     intent.putExtra("name" , item.getName());
-                    intent.putExtra("id" , item.getId());
+                    intent.putExtra("id" , item.getJobId());
                     intent.putExtra("bid" , item.getBeneficiaryID());
                     intent.putExtra("fname" , item.getFatherName());
                     intent.putExtra("state" , item.getState());
                     intent.putExtra("district" , item.getDistrict());
                     intent.putExtra("city" , item.getCity());
                     intent.putExtra("pname" , item.getProjectName());
-                    intent.putExtra("ward" , item.getWard());
+                    intent.putExtra("ward" , item.getAddress());
                     context.startActivity(intent);
 
                 }
