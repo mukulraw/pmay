@@ -1,13 +1,17 @@
 package com.ddf.pmay;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import github.nisrulz.easydeviceinfo.base.EasyLocationMod;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -31,7 +36,7 @@ public class PendingVisit extends Fragment {
     RecyclerView grid;
     GridLayoutManager manager;
     NotificationAdapter adapter;
-    List<jobListBean> list;
+    List<pendingBean> list;
     ProgressBar progress;
 
 
@@ -59,6 +64,27 @@ public class PendingVisit extends Fragment {
         super.onResume();
 
 
+        EasyLocationMod easyLocationMod = new EasyLocationMod(getContext());
+
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        double[] l = easyLocationMod.getLatLong();
+        String lat = String.valueOf(l[0]);
+        String lon = String.valueOf(l[1]);
+
+        Log.d("latitude" , lat);
+        Log.d("latitude" , lon);
+
+
+
         progress.setVisibility(View.VISIBLE);
 
         bean b = (bean) Objects.requireNonNull(getActivity()).getApplicationContext();
@@ -71,10 +97,10 @@ public class PendingVisit extends Fragment {
         ApiInterface cr = retrofit.create(ApiInterface.class);
 
 
-        Call<List<jobListBean>> call = cr.pendingList(SharePreferenceUtils.getInstance().getString("id"));
-        call.enqueue(new Callback<List<jobListBean>>() {
+        Call<List<pendingBean>> call = cr.pendingList(SharePreferenceUtils.getInstance().getString("id") , lat , lon);
+        call.enqueue(new Callback<List<pendingBean>>() {
             @Override
-            public void onResponse(@NonNull Call<List<jobListBean>> call, @NonNull Response<List<jobListBean>> response) {
+            public void onResponse(@NonNull Call<List<pendingBean>> call, @NonNull Response<List<pendingBean>> response) {
 
                 if (response.body() != null) {
                     adapter.setGridData(response.body());
@@ -84,7 +110,7 @@ public class PendingVisit extends Fragment {
             }
 
             @Override
-            public void onFailure(@NonNull Call<List<jobListBean>> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<List<pendingBean>> call, @NonNull Throwable t) {
                 progress.setVisibility(View.GONE);
             }
         });
@@ -94,14 +120,14 @@ public class PendingVisit extends Fragment {
 
     class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.ViewHolder> {
         Context context;
-        List<jobListBean> list;
+        List<pendingBean> list;
 
-        NotificationAdapter(Context context, List<jobListBean> list) {
+        NotificationAdapter(Context context, List<pendingBean> list) {
             this.context = context;
             this.list = list;
         }
 
-        void setGridData(List<jobListBean> list) {
+        void setGridData(List<pendingBean> list) {
             this.list = list;
             notifyDataSetChanged();
         }
@@ -120,10 +146,10 @@ public class PendingVisit extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
 
-            final jobListBean item = list.get(i);
+            final pendingBean item = list.get(i);
 
             viewHolder.name.setText(item.getName());
-            viewHolder.id.setText("ID : " + item.getBeneficiaryID());
+            viewHolder.id.setText("ID : " + item.getBid());
             viewHolder.address.setText(item.getCity() + ", " + item.getDistrict());
 
             viewHolder.visit.setOnClickListener(new View.OnClickListener() {
@@ -133,13 +159,15 @@ public class PendingVisit extends Fragment {
                     Intent intent = new Intent(context , UpdateJob.class);
                     intent.putExtra("name" , item.getName());
                     intent.putExtra("id" , item.getJobId());
-                    intent.putExtra("bid" , item.getBeneficiaryID());
-                    intent.putExtra("fname" , item.getFatherName());
+                    intent.putExtra("iid" , item.getId());
+                    intent.putExtra("bid" , item.getBid());
+                    intent.putExtra("fname" , item.getFname());
                     intent.putExtra("state" , item.getState());
                     intent.putExtra("district" , item.getDistrict());
                     intent.putExtra("city" , item.getCity());
-                    intent.putExtra("pname" , item.getProjectName());
-                    intent.putExtra("ward" , item.getAddress());
+                    intent.putExtra("pname" , item.getPname());
+                    intent.putExtra("ward" , item.getWard());
+                    intent.putExtra("stage" , item.getStage());
                     context.startActivity(intent);
 
                 }

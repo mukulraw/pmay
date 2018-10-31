@@ -17,7 +17,9 @@ public interface ApiInterface {
     Call<loginBean> login
             (
                     @Part("phone") String phone,
-                    @Part("password") String password
+                    @Part("password") String password,
+                    @Part("lat") String lat,
+                    @Part("lng") String lng
             );
 
     @Multipart
@@ -27,13 +29,25 @@ public interface ApiInterface {
                     @Part("name") String name,
                     @Part("phone") String phone,
                     @Part("password") String password,
-                    @Part("area_id") String areaId
+                    @Part("area_id") String areaId,
+                    @Part("lat") String lat,
+                    @Part("lng") String lng
             );
 
     @Multipart
     @POST("pmay/api/peding_get.php")
-    Call<List<jobListBean>> pendingList(
-            @Part("uid") String userId
+    Call<List<pendingBean>> pendingList(
+            @Part("uid") String userId,
+            @Part("lat") String lat,
+            @Part("lng") String lng
+    );
+
+    @Multipart
+    @POST("pmay/api/notifications.php")
+    Call<List<notificationBean>> notifications(
+            @Part("uid") String userId,
+            @Part("lat") String lat,
+            @Part("lng") String lng
     );
 
     @GET("pmay/api/areasGet.php")
@@ -42,7 +56,9 @@ public interface ApiInterface {
     @Multipart
     @POST("pmay/api/visited_get.php")
     Call<List<jobListBean>> visitedList(
-            @Part("uid") String userId
+            @Part("uid") String userId,
+            @Part("lat") String lat,
+            @Part("lng") String lng
     );
 
     @Multipart
@@ -50,10 +66,28 @@ public interface ApiInterface {
     Call<String> updateJob
             (
                     @Part("id") String id,
+                    @Part("iid") String iid,
                     @Part("stage") String stage,
                     @Part("payment") String payment,
                     @Part("sd") String sd,
-                    @Part("ed") String ed
+                    @Part("ed") String ed,
+                    @Part("lat") String lat,
+                    @Part("lng") String lng
             );
+
+    @Multipart
+    @POST("pmay/api/finishJob.php")
+    Call<String> finishJob
+            (
+                    @Part("id") String id,
+                    @Part("iid") String iid,
+                    @Part("stage") String stage,
+                    @Part("payment") String payment,
+                    @Part("sd") String sd,
+                    @Part("ed") String ed,
+                    @Part("lat") String lat,
+                    @Part("lng") String lng
+            );
+
 
 }

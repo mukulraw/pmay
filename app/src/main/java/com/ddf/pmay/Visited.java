@@ -1,12 +1,16 @@
 package com.ddf.pmay;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import github.nisrulz.easydeviceinfo.base.EasyLocationMod;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -58,6 +63,25 @@ public class Visited extends Fragment {
     public void onResume() {
         super.onResume();
 
+        EasyLocationMod easyLocationMod = new EasyLocationMod(getContext());
+
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        double[] l = easyLocationMod.getLatLong();
+        String lat = String.valueOf(l[0]);
+        String lon = String.valueOf(l[1]);
+
+        Log.d("latitude" , lat);
+        Log.d("latitude" , lon);
+
 
         progress.setVisibility(View.VISIBLE);
 
@@ -71,7 +95,7 @@ public class Visited extends Fragment {
         ApiInterface cr = retrofit.create(ApiInterface.class);
 
 
-        Call<List<jobListBean>> call = cr.visitedList(SharePreferenceUtils.getInstance().getString("id"));
+        Call<List<jobListBean>> call = cr.visitedList(SharePreferenceUtils.getInstance().getString("id") , lat , lon);
         call.enqueue(new Callback<List<jobListBean>>() {
             @Override
             public void onResponse(@NonNull Call<List<jobListBean>> call, @NonNull Response<List<jobListBean>> response) {

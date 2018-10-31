@@ -1,8 +1,11 @@
 package com.ddf.pmay;
 
+import android.Manifest;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,6 +22,7 @@ import android.widget.Toast;
 
 import java.util.Calendar;
 
+import github.nisrulz.easydeviceinfo.base.EasyLocationMod;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -45,6 +49,26 @@ public class UpdateJob extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_update_job);
+
+        EasyLocationMod easyLocationMod = new EasyLocationMod(this);
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        double[] l = easyLocationMod.getLatLong();
+        final String lat = String.valueOf(l[0]);
+        final String lon = String.valueOf(l[1]);
+
+        Log.d("latitude" , lat);
+        Log.d("latitude" , lon);
+
 
         name = findViewById(R.id.textView13);
         fname = findViewById(R.id.textView20);
@@ -90,6 +114,36 @@ public class UpdateJob extends AppCompatActivity {
                 dialog.show();
 
                 RadioGroup rg = dialog.findViewById(R.id.group);
+                RadioButton rb1 = dialog.findViewById(R.id.stg1);
+                RadioButton rb2 = dialog.findViewById(R.id.stg2);
+                RadioButton rb3 = dialog.findViewById(R.id.stg3);
+                RadioButton rb4 = dialog.findViewById(R.id.stg4);
+
+
+                String sta = getIntent().getStringExtra("stage");
+
+                switch (sta) {
+                    case "Stage 1":
+                        rb1.setEnabled(false);
+                        break;
+                    case "Stage 2":
+                        rb1.setEnabled(false);
+                        rb2.setEnabled(false);
+                        break;
+                    case "Stage 3":
+                        rb1.setEnabled(false);
+                        rb2.setEnabled(false);
+                        rb3.setEnabled(false);
+                        break;
+                    case "Stage 4":
+                        rb1.setEnabled(false);
+                        rb2.setEnabled(false);
+                        rb3.setEnabled(false);
+                        rb4.setEnabled(false);
+                        stg = sta;
+                        break;
+                }
+
 
                 rg.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
                     @Override
@@ -201,6 +255,13 @@ public class UpdateJob extends AppCompatActivity {
 
 
 
+        if (getIntent().getStringExtra("stage").equals("Stage 4"))
+        {
+            submit.setText("FINISH");
+
+        }
+
+
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -214,42 +275,86 @@ public class UpdateJob extends AppCompatActivity {
                             if (ed.length() > 0)
                             {
 
-                                Log.d("asdasd" , "validated");
+                                if (getIntent().getStringExtra("stage").equals("Stage 4"))
+                                {
+                                    Log.d("asdasd" , "validated");
 
 
-                                progress.setVisibility(View.VISIBLE);
+                                    progress.setVisibility(View.VISIBLE);
 
-                                bean b = (bean) getApplicationContext();
+                                    bean b = (bean) getApplicationContext();
 
-                                Retrofit retrofit = new Retrofit.Builder()
-                                        .baseUrl(b.BASE_URL)
-                                        .addConverterFactory(ScalarsConverterFactory.create())
-                                        .addConverterFactory(GsonConverterFactory.create()).build();
+                                    Retrofit retrofit = new Retrofit.Builder()
+                                            .baseUrl(b.BASE_URL)
+                                            .addConverterFactory(ScalarsConverterFactory.create())
+                                            .addConverterFactory(GsonConverterFactory.create()).build();
 
-                                ApiInterface cr = retrofit.create(ApiInterface.class);
+                                    ApiInterface cr = retrofit.create(ApiInterface.class);
 
-                                Call<String> call = cr.updateJob(getIntent().getStringExtra("id") , stg , "1" , sd , ed);
+                                    Call<String> call = cr.finishJob(getIntent().getStringExtra("id") , getIntent().getStringExtra("iid") , stg , "1" , sd , ed , lat , lon);
 
-                                call.enqueue(new Callback<String>() {
-                                    @Override
-                                    public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                                    call.enqueue(new Callback<String>() {
+                                        @Override
+                                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
 
-                                        if (response.body() != null) {
-                                            if (response.body().equals("1"))
-                                            {
-                                                Toast.makeText(UpdateJob.this, "Submitted Successfully", Toast.LENGTH_SHORT).show();
-                                                finish();
+                                            if (response.body() != null) {
+                                                if (response.body().equals("1"))
+                                                {
+                                                    Toast.makeText(UpdateJob.this, "Submitted Successfully", Toast.LENGTH_SHORT).show();
+                                                    finish();
+                                                }
+                                                progress.setVisibility(View.GONE);
                                             }
-                                            progress.setVisibility(View.GONE);
+
                                         }
 
-                                    }
+                                        @Override
+                                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                                            progress.setVisibility(View.GONE);
+                                        }
+                                    });
+                                }
+                                else
+                                {
+                                    Log.d("asdasd" , "validated");
 
-                                    @Override
-                                    public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                                        progress.setVisibility(View.GONE);
-                                    }
-                                });
+
+                                    progress.setVisibility(View.VISIBLE);
+
+                                    bean b = (bean) getApplicationContext();
+
+                                    Retrofit retrofit = new Retrofit.Builder()
+                                            .baseUrl(b.BASE_URL)
+                                            .addConverterFactory(ScalarsConverterFactory.create())
+                                            .addConverterFactory(GsonConverterFactory.create()).build();
+
+                                    ApiInterface cr = retrofit.create(ApiInterface.class);
+
+                                    Call<String> call = cr.updateJob(getIntent().getStringExtra("id") , getIntent().getStringExtra("iid") , stg , "1" , sd , ed , lat , lon);
+
+                                    call.enqueue(new Callback<String>() {
+                                        @Override
+                                        public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+
+                                            if (response.body() != null) {
+                                                if (response.body().equals("1"))
+                                                {
+                                                    Toast.makeText(UpdateJob.this, "Submitted Successfully", Toast.LENGTH_SHORT).show();
+                                                    finish();
+                                                }
+                                                progress.setVisibility(View.GONE);
+                                            }
+
+                                        }
+
+                                        @Override
+                                        public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
+                                            progress.setVisibility(View.GONE);
+                                        }
+                                    });
+                                }
+
+
 
                             }
                             else

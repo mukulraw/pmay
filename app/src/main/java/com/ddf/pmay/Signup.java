@@ -1,8 +1,12 @@
 package com.ddf.pmay;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -17,6 +21,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
 
+import github.nisrulz.easydeviceinfo.base.EasyLocationMod;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -38,6 +43,26 @@ public class Signup extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
+
+        EasyLocationMod easyLocationMod = new EasyLocationMod(this);
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        double[] l = easyLocationMod.getLatLong();
+        final String lat = String.valueOf(l[0]);
+        final String lon = String.valueOf(l[1]);
+
+        Log.d("latitude" , lat);
+        Log.d("latitude" , lon);
+
 
         areasName = new ArrayList<>();
         areasId = new ArrayList<>();
@@ -129,7 +154,7 @@ public class Signup extends AppCompatActivity {
 
                             ApiInterface cr = retrofit.create(ApiInterface.class);
 
-                            Call<String> call1 = cr.signup(n, ph, pa, areaId);
+                            Call<String> call1 = cr.signup(n, ph, pa, areaId , lat , lon);
 
                             call1.enqueue(new Callback<String>() {
                                 @Override
