@@ -23,6 +23,15 @@ public interface ApiInterface {
             );
 
     @Multipart
+    @POST("pmay/api/track.php")
+    Call<loginBean> track
+            (
+                    @Part("userId") String password,
+                    @Part("lat") String lat,
+                    @Part("lng") String lng
+            );
+
+    @Multipart
     @POST("pmay/api/signup.php")
     Call<String> signup
             (

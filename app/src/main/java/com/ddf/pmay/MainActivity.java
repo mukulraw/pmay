@@ -1,5 +1,6 @@
 package com.ddf.pmay;
 
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.FragmentManager;
@@ -82,6 +83,9 @@ public class MainActivity extends AppCompatActivity {
 
         bottom.setSelectedItemId(R.id.beneficiary);
 
+        Intent intent = new Intent(MainActivity.this, NotifyService.class);
+
+        this.startService(intent);
 
     }
 }
