@@ -65,12 +65,15 @@ public class Splash extends AppCompatActivity {
         int permission = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_COARSE_LOCATION);
 
-        if (permission == PackageManager.PERMISSION_GRANTED) {
+        int permission2 = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION);
+
+        if (permission == PackageManager.PERMISSION_GRANTED && permission2 == PackageManager.PERMISSION_GRANTED) {
             startApp();
         } else {
 
             ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION , Manifest.permission.ACCESS_FINE_LOCATION},
                     PERMISSIONS_REQUEST);
         }
 

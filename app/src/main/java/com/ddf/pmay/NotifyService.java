@@ -1,18 +1,26 @@
 package com.ddf.pmay;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.ddf.pmay.loginPOJO.loginBean;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Executor;
 
 import github.nisrulz.easydeviceinfo.base.EasyLocationMod;
 import retrofit2.Call;
@@ -27,23 +35,28 @@ public class NotifyService extends Service {
     Timer timer;
     //ConnectionDetector cd;
 
+    FusedLocationProviderClient fusedLocationProviderClient;
+    String latitude, longitude;
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
 
+
     private void doSomethingRepeatedly() {
         timer = new Timer();
-        timer.scheduleAtFixedRate( new TimerTask() {
+        timer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
 
 
+                try {
 
-                try{
+                    fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
 
 
-                    EasyLocationMod easyLocationMod = new EasyLocationMod(getApplicationContext());
+                    //EasyLocationMod easyLocationMod = new EasyLocationMod(getApplicationContext());
 
                     if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                         // TODO: Consider calling
@@ -55,12 +68,39 @@ public class NotifyService extends Service {
                         // for ActivityCompat#requestPermissions for more details.
                         return;
                     }
-                    double[] l = easyLocationMod.getLatLong();
+
+
+                    fusedLocationProviderClient.getLastLocation()
+                            .addOnSuccessListener((Executor)getApplicationContext(), new OnSuccessListener<Location>() {
+                                @Override
+                                public void onSuccess(Location location) {
+                                    latitude = String.valueOf(location.getLatitude());
+                                    longitude = String.valueOf(location.getLongitude());
+
+
+
+                                    Log.i("latitude", latitude);
+                                    Log.i("longitude", longitude);
+
+
+                                }
+                            })
+                            .addOnFailureListener((Executor) getApplicationContext(), new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+
+                                    Log.i("error",String.valueOf(e));
+
+                                }
+                            });
+
+
+                   /* double[] l = easyLocationMod.getLatLong();
                     final String lat = String.valueOf(l[0]);
                     final String lon = String.valueOf(l[1]);
 
-                    Log.d("latitude" , lat);
-                    Log.d("latitude" , lon);
+                    Log.d("latitude", lat);
+                    Log.d("latitude", lon);*/
 
 
                     bean b = (bean) getApplicationContext();
@@ -73,16 +113,12 @@ public class NotifyService extends Service {
                     ApiInterface cr = retrofit.create(ApiInterface.class);
 
 
-
-
-
-                    Call<loginBean> call = cr.track(SharePreferenceUtils.getInstance().getString("id") , lat , lon);
+                    Call<loginBean> call = cr.track(SharePreferenceUtils.getInstance().getString("id"), latitude, longitude);
 
 
                     call.enqueue(new Callback<loginBean>() {
                         @Override
                         public void onResponse(Call<loginBean> call, Response<loginBean> response) {
-
 
 
                         }
@@ -94,15 +130,13 @@ public class NotifyService extends Service {
                     });
 
 
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                     // TODO: handle exception
                 }
 
             }
-        }, 0, 1000 * 60 * 15);
-
+        }, 0, 1000 * 15);
 
 
     }
@@ -114,14 +148,13 @@ public class NotifyService extends Service {
 
         receive r = new receive();
 
-        if (r!=null) {
+        if (r != null) {
             try {
 
                 unregisterReceiver(r);
-                r=null;
+                r = null;
 
-            }catch (Exception e)
-            {
+            } catch (Exception e) {
 
             }
         }

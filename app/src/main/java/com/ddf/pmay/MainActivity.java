@@ -11,6 +11,8 @@ import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.ddf.pmay.loginPOJO.LocationService;
+
 public class MainActivity extends AppCompatActivity {
 
     BottomNavigationView bottom;
@@ -83,7 +85,8 @@ public class MainActivity extends AppCompatActivity {
 
         bottom.setSelectedItemId(R.id.beneficiary);
 
-        Intent intent = new Intent(MainActivity.this, NotifyService.class);
+        //Intent intent = new Intent(MainActivity.this, NotifyService.class);
+        Intent intent = new Intent(MainActivity.this, LocationService.class);
 
         this.startService(intent);
 
