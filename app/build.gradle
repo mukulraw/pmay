@@ -5,7 +5,7 @@ android {
         config {
             keyAlias 'pmay'
             keyPassword 'pmay@123'
-            storeFile file('F:/softcode/pmay.jks')
+            storeFile file('D:/mukul/StudioProjects/pmay/pmay.jks')
             storePassword 'pmay@123'
         }
     }
@@ -14,8 +14,8 @@ android {
         applicationId "com.ddf.pmay"
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 5
-        versionName "1.4"
+        versionCode 6
+        versionName "1.5"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         signingConfig signingConfigs.config

@@ -2,14 +2,21 @@ package com.ddf.pmay;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
+import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.ddf.pmay.loginPOJO.loginBean;
@@ -34,8 +41,9 @@ public class NotifyService extends Service {
 
     Timer timer;
     //ConnectionDetector cd;
+    Context context;
 
-    FusedLocationProviderClient fusedLocationProviderClient;
+    private FusedLocationProviderClient mFusedLocationClient;
     String latitude, longitude;
 
     @Nullable
@@ -45,6 +53,33 @@ public class NotifyService extends Service {
     }
 
 
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        this.context = this;
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            String NOTIFICATION_CHANNEL_ID = "com.example.simpleapp";
+            String channelName = "My Background Service";
+            NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
+            chan.setLightColor(Color.BLUE);
+            chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+            NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            assert manager != null;
+            manager.createNotificationChannel(chan);
+
+            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
+            Notification notification = notificationBuilder.setOngoing(true)
+                    .setSmallIcon(R.drawable.ddfconsultantsapr16)
+                    .setContentTitle("App is running in background")
+                    .setPriority(NotificationManager.IMPORTANCE_MIN)
+                    .setCategory(Notification.CATEGORY_SERVICE)
+                    .build();
+            startForeground(2, notification);
+        }
+    }
+
     private void doSomethingRepeatedly() {
         timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -53,12 +88,8 @@ public class NotifyService extends Service {
 
                 try {
 
-                    fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getApplicationContext());
 
-
-                    //EasyLocationMod easyLocationMod = new EasyLocationMod(getApplicationContext());
-
-                    if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                         // TODO: Consider calling
                         //    ActivityCompat#requestPermissions
                         // here to request the missing permissions, and then overriding
@@ -70,64 +101,57 @@ public class NotifyService extends Service {
                     }
 
 
-                    fusedLocationProviderClient.getLastLocation()
-                            .addOnSuccessListener((Executor)getApplicationContext(), new OnSuccessListener<Location>() {
+                    mFusedLocationClient.getLastLocation()
+                            .addOnSuccessListener(new OnSuccessListener<Location>() {
                                 @Override
                                 public void onSuccess(Location location) {
-                                    latitude = String.valueOf(location.getLatitude());
-                                    longitude = String.valueOf(location.getLongitude());
+                                    // GPS location can be null if GPS is switched off
+                                    if (location != null) {
 
 
 
-                                    Log.i("latitude", latitude);
-                                    Log.i("longitude", longitude);
+                                        latitude = String.valueOf(location.getLatitude());
+                                        longitude = String.valueOf(location.getLongitude());
+
+                                        Log.d("llll" , latitude);
+
+                                        bean b = (bean) getApplicationContext();
+
+                                        Retrofit retrofit = new Retrofit.Builder()
+                                                .baseUrl(b.BASE_URL)
+                                                .addConverterFactory(ScalarsConverterFactory.create())
+                                                .addConverterFactory(GsonConverterFactory.create()).build();
+
+                                        ApiInterface cr = retrofit.create(ApiInterface.class);
 
 
+                                        Call<loginBean> call = cr.track(SharePreferenceUtils.getInstance().getString("id"), latitude, longitude);
+
+
+                                        call.enqueue(new Callback<loginBean>() {
+                                            @Override
+                                            public void onResponse(Call<loginBean> call, Response<loginBean> response) {
+
+                                            }
+
+                                            @Override
+                                            public void onFailure(Call<loginBean> call, Throwable t) {
+
+                                            }
+                                        });
+
+                                    }
                                 }
                             })
-                            .addOnFailureListener((Executor) getApplicationContext(), new OnFailureListener() {
+                            .addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
-
-                                    Log.i("error",String.valueOf(e));
-
+                                    Log.d("MapDemoActivity", "Error trying to get last GPS location");
+                                    e.printStackTrace();
                                 }
                             });
 
 
-                   /* double[] l = easyLocationMod.getLatLong();
-                    final String lat = String.valueOf(l[0]);
-                    final String lon = String.valueOf(l[1]);
-
-                    Log.d("latitude", lat);
-                    Log.d("latitude", lon);*/
-
-
-                    bean b = (bean) getApplicationContext();
-
-                    Retrofit retrofit = new Retrofit.Builder()
-                            .baseUrl(b.BASE_URL)
-                            .addConverterFactory(ScalarsConverterFactory.create())
-                            .addConverterFactory(GsonConverterFactory.create()).build();
-
-                    ApiInterface cr = retrofit.create(ApiInterface.class);
-
-
-                    Call<loginBean> call = cr.track(SharePreferenceUtils.getInstance().getString("id"), latitude, longitude);
-
-
-                    call.enqueue(new Callback<loginBean>() {
-                        @Override
-                        public void onResponse(Call<loginBean> call, Response<loginBean> response) {
-
-
-                        }
-
-                        @Override
-                        public void onFailure(Call<loginBean> call, Throwable t) {
-
-                        }
-                    });
 
 
                 } catch (Exception e) {
@@ -136,7 +160,7 @@ public class NotifyService extends Service {
                 }
 
             }
-        }, 0, 1000 * 15);
+        }, 0, 1000 * 15 *60);
 
 
     }

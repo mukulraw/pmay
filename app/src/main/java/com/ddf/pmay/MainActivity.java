@@ -1,6 +1,7 @@
 package com.ddf.pmay;
 
 import android.content.Intent;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.FragmentManager;
@@ -85,10 +86,14 @@ public class MainActivity extends AppCompatActivity {
 
         bottom.setSelectedItemId(R.id.beneficiary);
 
-        //Intent intent = new Intent(MainActivity.this, NotifyService.class);
-        Intent intent = new Intent(MainActivity.this, LocationService.class);
-
-        this.startService(intent);
-
+        Intent pushIntent = new Intent(MainActivity.this, NotifyService.class);
+        //Intent pushIntent = new Intent(context, LocationService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            MainActivity.this.startForegroundService(pushIntent);
+        }
+        else
+        {
+            MainActivity.this.startService(pushIntent);
+        }
     }
 }
