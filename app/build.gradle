@@ -11,11 +11,11 @@ android {
     }
     compileSdkVersion 28
     defaultConfig {
-        applicationId "com.ddf.pmay"
+        applicationId "com.ddf.pmay"    
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 6
-        versionName "1.5"
+        versionCode 8
+        versionName "1.7"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         signingConfig signingConfigs.config

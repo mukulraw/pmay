@@ -6,8 +6,6 @@ import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
 
-import com.ddf.pmay.loginPOJO.LocationService;
-
 public class receive extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {

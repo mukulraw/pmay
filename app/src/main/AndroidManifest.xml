@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.ddf.pmay">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -7,6 +8,9 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+
+
 
     <application
         android:name=".bean"
@@ -16,7 +20,11 @@
         android:roundIcon="@drawable/ddfconsultantsapr16"
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:targetApi="m">
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
         <activity
             android:name=".Splash"
             android:screenOrientation="portrait">
@@ -68,9 +76,6 @@
             android:name=".NotifyService"
             android:enabled="true"
             android:exported="true" />
-        <service android:name=".loginPOJO.LocationService"
-            android:enabled="true"
-            android:exported="true"/>
 
     </application>
 

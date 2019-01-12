@@ -13,15 +13,22 @@ import android.graphics.Color;
 import android.location.Location;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.ddf.pmay.loginPOJO.loginBean;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
@@ -37,6 +44,8 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
+import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
+
 public class NotifyService extends Service {
 
     Timer timer;
@@ -45,6 +54,11 @@ public class NotifyService extends Service {
 
     private FusedLocationProviderClient mFusedLocationClient;
     String latitude, longitude;
+
+    private LocationRequest mLocationRequest;
+
+    private long UPDATE_INTERVAL = 60 * 1000 * 15;  /* 10 secs */
+    private long FASTEST_INTERVAL = 60 * 1000 * 5; /* 2 sec */
 
     @Nullable
     @Override
@@ -57,11 +71,11 @@ public class NotifyService extends Service {
     public void onCreate() {
         super.onCreate();
         this.context = this;
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        mFusedLocationClient = getFusedLocationProviderClient(this);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            String NOTIFICATION_CHANNEL_ID = "com.example.simpleapp";
-            String channelName = "My Background Service";
+            String NOTIFICATION_CHANNEL_ID = "com.ddf.pmay";
+            String channelName = "My Location Service";
             NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
             chan.setLightColor(Color.BLUE);
             chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
@@ -78,6 +92,9 @@ public class NotifyService extends Service {
                     .build();
             startForeground(2, notification);
         }
+
+        startLocationUpdates();
+
     }
 
     private void doSomethingRepeatedly() {
@@ -109,11 +126,10 @@ public class NotifyService extends Service {
                                     if (location != null) {
 
 
-
                                         latitude = String.valueOf(location.getLatitude());
                                         longitude = String.valueOf(location.getLongitude());
 
-                                        Log.d("llll" , latitude);
+                                        Log.d("llll", latitude);
 
                                         bean b = (bean) getApplicationContext();
 
@@ -152,15 +168,13 @@ public class NotifyService extends Service {
                             });
 
 
-
-
                 } catch (Exception e) {
                     e.printStackTrace();
                     // TODO: handle exception
                 }
 
             }
-        }, 0, 1000 * 15 *60);
+        }, 0, 1000 * 15 * 60);
 
 
     }
@@ -188,10 +202,89 @@ public class NotifyService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        doSomethingRepeatedly();
+        //doSomethingRepeatedly();
 
         return Service.START_STICKY;
     }
 
+    protected void startLocationUpdates() {
+
+        // Create the location request to start receiving updates
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest.setInterval(UPDATE_INTERVAL);
+        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
+
+        // Create LocationSettingsRequest object using location request
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
+        builder.addLocationRequest(mLocationRequest);
+        LocationSettingsRequest locationSettingsRequest = builder.build();
+
+        // Check whether location settings are satisfied
+        // https://developers.google.com/android/reference/com/google/android/gms/location/SettingsClient
+        SettingsClient settingsClient = LocationServices.getSettingsClient(this);
+        settingsClient.checkLocationSettings(locationSettingsRequest);
+
+        // new Google API SDK v11 uses getFusedLocationProviderClient(this)
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        getFusedLocationProviderClient(context).requestLocationUpdates(mLocationRequest, new LocationCallback() {
+                    @Override
+                    public void onLocationResult(LocationResult locationResult) {
+                        // do work here
+                        onLocationChanged(locationResult.getLastLocation());
+                    }
+                },
+                Looper.myLooper());
+    }
+
+    public void onLocationChanged(Location location) {
+        // New location has now been determined
+
+        latitude = String.valueOf(location.getLatitude());
+        longitude = String.valueOf(location.getLongitude());
+
+        Log.d("llll", latitude);
+
+        bean b = (bean) getApplicationContext();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(b.BASE_URL)
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create()).build();
+
+        ApiInterface cr = retrofit.create(ApiInterface.class);
+
+
+        Call<loginBean> call = cr.track(SharePreferenceUtils.getInstance().getString("id"), latitude, longitude);
+
+
+        call.enqueue(new Callback<loginBean>() {
+            @Override
+            public void onResponse(Call<loginBean> call, Response<loginBean> response) {
+
+            }
+
+            @Override
+            public void onFailure(Call<loginBean> call, Throwable t) {
+
+            }
+        });
+
+
+        /*String msg = "Updated Location: " +
+                Double.toString(location.getLatitude()) + "," +
+                Double.toString(location.getLongitude());
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();*/
+        // You can now create a LatLng Object for use with maps
+    }
 
 }

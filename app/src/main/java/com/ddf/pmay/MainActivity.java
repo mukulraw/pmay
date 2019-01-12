@@ -12,8 +12,6 @@ import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.ddf.pmay.loginPOJO.LocationService;
-
 public class MainActivity extends AppCompatActivity {
 
     BottomNavigationView bottom;
