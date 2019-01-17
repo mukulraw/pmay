@@ -76,7 +76,7 @@ public class NotifyService extends Service {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             String NOTIFICATION_CHANNEL_ID = "com.ddf.pmay";
             String channelName = "My Location Service";
-            NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
+            NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_HIGH);
             chan.setLightColor(Color.BLUE);
             chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
             NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -87,7 +87,7 @@ public class NotifyService extends Service {
             Notification notification = notificationBuilder.setOngoing(true)
                     .setSmallIcon(R.drawable.ddfconsultantsapr16)
                     .setContentTitle("App is running in background")
-                    .setPriority(NotificationManager.IMPORTANCE_MIN)
+                    .setPriority(NotificationManager.IMPORTANCE_HIGH)
                     .setCategory(Notification.CATEGORY_SERVICE)
                     .build();
             startForeground(2, notification);
@@ -253,6 +253,8 @@ public class NotifyService extends Service {
         longitude = String.valueOf(location.getLongitude());
 
         Log.d("llll", latitude);
+
+        //Toast.makeText(context, latitude, Toast.LENGTH_SHORT).show();
 
         bean b = (bean) getApplicationContext();
 
