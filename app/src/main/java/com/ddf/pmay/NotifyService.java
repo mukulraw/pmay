@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -44,6 +45,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
+import static com.ddf.pmay.bean.CHANNEL_ID;
 import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
 
 public class NotifyService extends Service {
@@ -71,29 +73,12 @@ public class NotifyService extends Service {
     public void onCreate() {
         super.onCreate();
         this.context = this;
-        mFusedLocationClient = getFusedLocationProviderClient(this);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            String NOTIFICATION_CHANNEL_ID = "com.ddf.pmay";
-            String channelName = "My Location Service";
-            NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_HIGH);
-            chan.setLightColor(Color.BLUE);
-            chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
-            NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            assert manager != null;
-            manager.createNotificationChannel(chan);
 
-            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
-            Notification notification = notificationBuilder.setOngoing(true)
-                    .setSmallIcon(R.drawable.ddfconsultantsapr16)
-                    .setContentTitle("App is running in background")
-                    .setPriority(NotificationManager.IMPORTANCE_HIGH)
-                    .setCategory(Notification.CATEGORY_SERVICE)
-                    .build();
-            startForeground(2, notification);
-        }
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        startLocationUpdates();
+
+       // startLocationUpdates();
 
     }
 
@@ -128,6 +113,8 @@ public class NotifyService extends Service {
 
                                         latitude = String.valueOf(location.getLatitude());
                                         longitude = String.valueOf(location.getLongitude());
+
+                                        Toast.makeText(context, latitude, Toast.LENGTH_SHORT).show();
 
                                         Log.d("llll", latitude);
 
@@ -174,7 +161,7 @@ public class NotifyService extends Service {
                 }
 
             }
-        }, 0, 1000 * 15 * 60);
+        }, 0, 1000 * 5);
 
 
     }
@@ -204,7 +191,22 @@ public class NotifyService extends Service {
 
         //doSomethingRepeatedly();
 
-        return Service.START_STICKY;
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this,
+                0, notificationIntent, 0);
+
+        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle("PMAY")
+                .setContentText("App is running in the background")
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentIntent(pendingIntent)
+                .build();
+
+        startForeground(1, notification);
+
+        doSomethingRepeatedly();
+
+        return Service.START_NOT_STICKY;
     }
 
     protected void startLocationUpdates() {

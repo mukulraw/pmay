@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -86,12 +87,12 @@ public class MainActivity extends AppCompatActivity {
 
         Intent pushIntent = new Intent(MainActivity.this, NotifyService.class);
         //Intent pushIntent = new Intent(context, LocationService.class);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            MainActivity.this.startForegroundService(pushIntent);
-        }
+        //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            ContextCompat.startForegroundService(this , pushIntent);
+        /*}
         else
         {
             MainActivity.this.startService(pushIntent);
-        }
+        }*/
     }
 }
