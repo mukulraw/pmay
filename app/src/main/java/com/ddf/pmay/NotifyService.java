@@ -206,7 +206,7 @@ public class NotifyService extends Service {
 
         doSomethingRepeatedly();
 
-        return Service.START_NOT_STICKY;
+        return Service.START_STICKY;
     }
 
     protected void startLocationUpdates() {
