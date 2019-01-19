@@ -14,8 +14,8 @@ android {
         applicationId "com.ddf.pmay"    
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 9
-        versionName "1.8"
+        versionCode 10
+        versionName "1.9"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         signingConfig signingConfigs.config
