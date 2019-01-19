@@ -87,12 +87,12 @@ public class MainActivity extends AppCompatActivity {
 
         Intent pushIntent = new Intent(MainActivity.this, NotifyService.class);
         //Intent pushIntent = new Intent(context, LocationService.class);
-        //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             ContextCompat.startForegroundService(this , pushIntent);
-        /*}
+        }
         else
         {
-            MainActivity.this.startService(pushIntent);
-        }*/
+            startService(pushIntent);
+        }
     }
 }

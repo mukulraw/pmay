@@ -13,6 +13,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
 import android.support.annotation.NonNull;
@@ -23,8 +24,11 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.ddf.pmay.loginPOJO.loginBean;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
@@ -48,16 +52,18 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 import static com.ddf.pmay.bean.CHANNEL_ID;
 import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
 
-public class NotifyService extends Service {
+public class NotifyService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     Timer timer;
     //ConnectionDetector cd;
     Context context;
 
-    private FusedLocationProviderClient mFusedLocationClient;
+    //private FusedLocationProviderClient mFusedLocationClient;
     String latitude, longitude;
 
     private LocationRequest mLocationRequest;
+
+    GoogleApiClient mGoogleApiClient;
 
     private long UPDATE_INTERVAL = 60 * 1000 * 15;  /* 10 secs */
     private long FASTEST_INTERVAL = 60 * 1000 * 5; /* 2 sec */
@@ -74,11 +80,25 @@ public class NotifyService extends Service {
         super.onCreate();
         this.context = this;
 
+        Log.d("service", "create");
 
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this,
+                0, notificationIntent, 0);
 
+        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle("PMAY")
+                .setContentText("App is running in the background")
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentIntent(pendingIntent)
+                .build();
 
-       // startLocationUpdates();
+        startForeground(1, notification);
+
+        buildGoogleApiClient();
+        mGoogleApiClient.connect();
+
+        // startLocationUpdates();
 
     }
 
@@ -87,10 +107,30 @@ public class NotifyService extends Service {
         timer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
 
+                Log.d("service", "repeat");
 
                 try {
 
+                    Log.d("service", "repeat1");
 
+
+                    LocationRequest mLocationRequest = LocationRequest.create();
+                    mLocationRequest.setInterval(60000);
+                    mLocationRequest.setFastestInterval(5000);
+                    mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                    LocationCallback mLocationCallback = new LocationCallback() {
+                        @Override
+                        public void onLocationResult(LocationResult locationResult) {
+                            if (locationResult == null) {
+                                return;
+                            }
+                            for (Location location : locationResult.getLocations()) {
+                                if (location != null) {
+                                    //TODO: UI updates.
+                                }
+                            }
+                        }
+                    };
                     if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                         // TODO: Consider calling
                         //    ActivityCompat#requestPermissions
@@ -103,56 +143,21 @@ public class NotifyService extends Service {
                     }
 
 
-                    mFusedLocationClient.getLastLocation()
-                            .addOnSuccessListener(new OnSuccessListener<Location>() {
-                                @Override
-                                public void onSuccess(Location location) {
-                                    // GPS location can be null if GPS is switched off
-                                    if (location != null) {
+                    LocationServices.getFusedLocationProviderClient(context).requestLocationUpdates(mLocationRequest, mLocationCallback, null);
 
 
-                                        latitude = String.valueOf(location.getLatitude());
-                                        longitude = String.valueOf(location.getLongitude());
-
-                                        Toast.makeText(context, latitude, Toast.LENGTH_SHORT).show();
-
-                                        Log.d("llll", latitude);
-
-                                        bean b = (bean) getApplicationContext();
-
-                                        Retrofit retrofit = new Retrofit.Builder()
-                                                .baseUrl(b.BASE_URL)
-                                                .addConverterFactory(ScalarsConverterFactory.create())
-                                                .addConverterFactory(GsonConverterFactory.create()).build();
-
-                                        ApiInterface cr = retrofit.create(ApiInterface.class);
+                    LocationServices.getFusedLocationProviderClient(context).getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location location) {
+                            //TODO: UI updates.
+                            if (location != null) {
 
 
-                                        Call<loginBean> call = cr.track(SharePreferenceUtils.getInstance().getString("id"), latitude, longitude);
 
 
-                                        call.enqueue(new Callback<loginBean>() {
-                                            @Override
-                                            public void onResponse(Call<loginBean> call, Response<loginBean> response) {
-
-                                            }
-
-                                            @Override
-                                            public void onFailure(Call<loginBean> call, Throwable t) {
-
-                                            }
-                                        });
-
-                                    }
-                                }
-                            })
-                            .addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Log.d("MapDemoActivity", "Error trying to get last GPS location");
-                                    e.printStackTrace();
-                                }
-                            });
+                            }
+                        }
+                    });
 
 
                 } catch (Exception e) {
@@ -169,6 +174,7 @@ public class NotifyService extends Service {
 
     @Override
     public void onDestroy() {
+        mGoogleApiClient.disconnect();
         super.onDestroy();
 
         receive r = new receive();
@@ -191,25 +197,14 @@ public class NotifyService extends Service {
 
         //doSomethingRepeatedly();
 
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this,
-                0, notificationIntent, 0);
+        Log.d("service", "start");
 
-        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle("PMAY")
-                .setContentText("App is running in the background")
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentIntent(pendingIntent)
-                .build();
-
-        startForeground(1, notification);
-
-        doSomethingRepeatedly();
+        //doSomethingRepeatedly();
 
         return Service.START_STICKY;
     }
 
-    protected void startLocationUpdates() {
+    /*protected void startLocationUpdates() {
 
         // Create the location request to start receiving updates
         mLocationRequest = new LocationRequest();
@@ -247,7 +242,7 @@ public class NotifyService extends Service {
                 },
                 Looper.myLooper());
     }
-
+*/
     public void onLocationChanged(Location location) {
         // New location has now been determined
 
@@ -290,5 +285,108 @@ public class NotifyService extends Service {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();*/
         // You can now create a LatLng Object for use with maps
     }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        Log.i("asdasd", "GoogleApiClient connected!");
+        //buildLocationSettingsRequest();
+        createLocationRequest();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+
+        if (location != null)
+        {
+            Log.i("asdasd", " Location: " + location);
+            latitude = String.valueOf(location.getLatitude());
+            longitude = String.valueOf(location.getLongitude());
+
+            //Toast.makeText(context, latitude, Toast.LENGTH_SHORT).show();
+
+            Log.d("llll", latitude);
+
+            bean b = (bean) getApplicationContext();
+
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(b.BASE_URL)
+                    .addConverterFactory(ScalarsConverterFactory.create())
+                    .addConverterFactory(GsonConverterFactory.create()).build();
+
+            ApiInterface cr = retrofit.create(ApiInterface.class);
+
+
+            Call<loginBean> call = cr.track(SharePreferenceUtils.getInstance().getString("id"), latitude, longitude);
+
+
+            call.enqueue(new Callback<loginBean>() {
+                @Override
+                public void onResponse(Call<loginBean> call, Response<loginBean> response) {
+
+                }
+
+                @Override
+                public void onFailure(Call<loginBean> call, Throwable t) {
+
+                }
+            });
+
+        }
+
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    protected synchronized void buildGoogleApiClient() {
+        Log.i("ASDAS", "Building GoogleApiClient");
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
+
+    }
+
+    protected void createLocationRequest() {
+        //remove location updates so that it resets
+        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this); //Import should not be **android.Location.LocationListener**
+        //import should be **import com.google.android.gms.location.LocationListener**;
+
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(10000);
+        mLocationRequest.setFastestInterval(5000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        //restart location updates with the new interval
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+
+    }
+
 
 }
